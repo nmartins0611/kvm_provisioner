@@ -1,0 +1,29 @@
+- hosts: kvm
+  tags: provision
+  become: true
+  become_user: root
+  become_method: sudo
+
+  vars:
+   kvm_vm_hostname: test.prometheus.io
+   kvm_vm_public_ip: 192.168.11.75
+   kvm_vm_root_pwd: 
+   kvm_vm_base_img: rhel8.5.qcow2 #NOTE: This should be the name of a base image in /var/lib/libvirt/images on your KVM host
+   kvm_vm_vcpus: "1"
+   kvm_vm_ram: "1024"
+   kvm_vm_os_disk_name: "{{ kvm_vm_hostname }}"
+   kvm_vm_os_disk_size: "25G"
+   kvm_vm_nics:  #NOTE: see example playbook for structure
+      - name: eth0
+        bootproto: static
+        onboot: yes
+        ip: "{{ kvm_vm_public_ip }}"
+        prefix: "24"
+        gateway: "192.168.122.1"
+        dns_server: "192.168.122.1"
+        config: "--type network --source network --model virtio"
+
+  tasks:
+    - name: Create KVM VM
+      include_role:
+        name: ansible-kvm-vm
